@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-card wide">
+      <div class="bank-logo"></div>
+      <h1>Open an Account</h1>
+      <p class="subtitle">Your registration will be reviewed by an administrator.</p>
+
+      <% if (error) { %><div class="alert error"><%= error %></div><% } %>
+
+      <form action="/register" method="POST" class="validate-form" novalidate>
+        <div class="form-grid">
+          <div><label>Username</label>
+            <input type="text" name="username" value="<%= form.username || '' %>" required
+                   pattern="[A-Za-z0-9_]{4,20}" data-msg="4-20 letters, numbers or underscores."></div>
+          <div><label>Email</label>
+            <input type="email" name="email" value="<%= form.email || '' %>" required></div>
+          <div><label>Password</label>
+            <input type="password" id="pw" name="password" minlength="6" required data-strength></div>
+          <div><label>Confirm Password</label>
+            <input type="password" name="confirm_password" required data-match="#pw"></div>
+          <div><label>First Name</label>
+            <input type="text" name="first_name" value="<%= form.first_name || '' %>" required></div>
+          <div><label>Last Name</label>
+            <input type="text" name="last_name" value="<%= form.last_name || '' %>" required></div>
+          <div><label>Phone (optional)</label>
+            <input type="text" name="phone" value="<%= form.phone || '' %>"
+                   pattern="[0-9+\- ]{7,15}" data-msg="Enter a valid phone number."></div>
+          <div><label>Account Type</label>
+            <select name="account_type">
+              <option value="Savings">Savings</option>
+              <option value="Checking" <%= form.account_type === 'Checking' ? 'selected' : '' %>>Checking</option>
+            </select></div>
+        </div>
+        <label>Address</label>
+        <textarea name="address" rows="2"><%= form.address || '' %></textarea>
+        <button type="submit" class="btn primary">Submit Registration</button>
+      </form>
+
+      <p class="auth-link">Already registered? <a href="/">Back to login</a></p>
+    </div>
+  </div>
+  <script src="/validate.js"></script>
+</body>
+</html>

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Online Banking Login</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="login-container">
+    <div class="login-card">
+      <div class="bank-logo"></div>
+      <h1>Online Banking</h1>
+      <p class="subtitle">Secure Banking Portal</p>
+
+      <% if (success) { %>
+        <div class="alert success"><%= success %></div>
+      <% } %>
+
+      <% if (error) { %>
+        <div class="alert error">
+          <%= error %>
+        </div>
+      <% } %>
+
+      <form class="validate-form" novalidate action="/login" method="POST">
+        <label>Username</label>
+        <input type="text"
+               name="username"
+               placeholder="Enter username"
+               required>
+
+        <label>Password</label>
+        <input type="password"
+               name="password"
+               placeholder="Enter password"
+               required>
+
+        <button type="submit" class="btn primary">Login</button>
+      </form>
+
+      <p class="auth-link">New customer? <a href="/register">Create an account</a></p>
+      <p class="login-note">Authorized users only</p>
+    </div>
+  </div>
+<script src="/validate.js"></script>
+</body>
+</html>

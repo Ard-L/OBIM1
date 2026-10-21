@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transfer Money</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+<%- include('partials/customer-header', { active: 'transfer' }) %>
+
+<main class="container">
+    <div class="page-header">
+        <h1>Transfer Money</h1>
+        <p>Available balance:
+            <strong>₱<%= Number(account.balance).toLocaleString('en-PH', { minimumFractionDigits: 2 }) %></strong>
+            &middot; Your account <%= account.account_number %></p>
+    </div>
+
+    <% if (success) { %><div class="alert success"><%= success %></div><% } %>
+    <% if (error) { %><div class="alert error"><%= error %></div><% } %>
+
+    <section class="card">
+        <h2>Send to Another Account</h2>
+        <form action="/customer/transfer" method="POST" class="validate-form" novalidate>
+            <label>Recipient Account Number</label>
+            <input type="text" name="to_account" maxlength="30" required
+                   pattern="[A-Za-z0-9\-]{6,30}" data-msg="Enter a valid account number (6-30 characters).">
+
+            <label>Amount</label>
+            <div class="money-input">
+                <span>₱</span>
+                <input type="number" name="amount" min="1" step="0.01" placeholder="0.00" required>
+            </div>
+
+            <label>Note (optional)</label>
+            <input type="text" name="note" maxlength="40" placeholder="e.g. Rent share">
+
+            <button type="submit" class="btn primary">Send Money</button>
+        </form>
+    </section>
+
+    <section class="card">
+        <h2>Recent Transfers</h2>
+        <div class="table-container">
+            <table>
+                <thead><tr><th>Date</th><th>Description</th><th>Amount</th></tr></thead>
+                <tbody>
+                    <% if (transfers.length === 0) { %>
+                    <tr><td colspan="3" class="empty">No transfers yet.</td></tr>
+                    <% } %>
+                    <% transfers.forEach(t => { %>
+                    <tr>
+                        <td><%= new Date(t.transaction_date).toLocaleString('en-PH') %></td>
+                        <td><%= t.description %></td>
+                        <td class="money"><%= Number(t.amount).toLocaleString('en-PH', { minimumFractionDigits: 2 }) %></td>
+                    </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+<script src="/validate.js"></script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+<header class="topbar">
+    <div>
+        <h2>Online Banking</h2>
+        <span>Administrator</span>
+    </div>
+    <nav class="nav">
+        <a href="/admin" class="<%= active === 'dashboard' ? 'active' : '' %>">Dashboard</a>
+        <a href="/admin/analytics" class="<%= active === 'analytics' ? 'active' : '' %>">Analytics</a>
+        <a href="/admin/reports" class="<%= active === 'reports' ? 'active' : '' %>">Reports</a>
+        <a href="/admin/create" class="<%= active === 'create' ? 'active' : '' %>">Create Customer</a>
+    </nav>
+    <a href="/logout" class="logout">Logout</a>
+</header>
+<script>
+window.addEventListener('pageshow', function (e) {
+    var nav = performance.getEntriesByType('navigation')[0];
+    if (e.persisted || (nav && nav.type === 'back_forward')) location.reload();
+});
+</script>

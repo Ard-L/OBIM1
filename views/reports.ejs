@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<% const fmt = n => Number(n).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+   const labels = { deposit: 'Deposit', withdrawal: 'Withdrawal', bill: 'Bill Payment', transfer: 'Transfer' };
+   const qs = 'from=' + filters.from + '&to=' + filters.to + '&type=' + filters.type; %>
+
+<%- include('partials/admin-header', { active: 'reports' }) %>
+
+<main class="container">
+    <div class="page-header">
+        <h1>Transaction Reports</h1>
+        <p>Filter all customer transactions and export them to CSV.</p>
+    </div>
+
+    <section class="card">
+        <form method="GET" action="/admin/reports" class="filter-row">
+            <div><label>From</label><input type="date" name="from" value="<%= filters.from %>"></div>
+            <div><label>To</label><input type="date" name="to" value="<%= filters.to %>"></div>
+            <div><label>Type</label>
+                <select name="type">
+                    <% [['all','All types'],['Deposit','Deposits'],['Withdrawal','Withdrawals'],['Bill','Bill payments'],['Transfer','Transfers']].forEach(o => { %>
+                    <option value="<%= o[0] %>" <%= filters.type === o[0] ? 'selected' : '' %>><%= o[1] %></option>
+                    <% }) %>
+                </select></div>
+            <div class="actions">
+                <button type="submit" class="btn primary" style="margin:0">Apply</button>
+                <a href="/admin/reports/csv?<%= qs %>" class="btn secondary" style="margin:0">Export CSV</a>
+            </div>
+        </form>
+    </section>
+
+    <div class="stat-grid">
+        <div class="stat"><span>Transactions</span><h3><%= totals.count %></h3></div>
+        <div class="stat"><span>Money In</span><h3>₱<%= fmt(totals.deposits) %></h3></div>
+        <div class="stat"><span>Money Out</span><h3>₱<%= fmt(totals.withdrawals) %></h3></div>
+        <div class="stat"><span>Net</span><h3>₱<%= fmt(totals.deposits - totals.withdrawals) %></h3></div>
+    </div>
+
+    <section class="card">
+        <h2>Results</h2>
+        <% if (truncated) { %><p class="inline-note">Showing the latest 500 rows. Export CSV for the full list.</p><% } %>
+        <div class="table-container">
+            <table>
+                <thead><tr><th>Date</th><th>Account</th><th>Customer</th><th>Type</th><th>Description</th><th>Amount</th></tr></thead>
+                <tbody>
+                    <% if (rows.length === 0) { %><tr><td colspan="6" class="empty">No transactions for this filter.</td></tr><% } %>
+                    <% rows.forEach(r => { %>
+                    <tr>
+                        <td><%= new Date(r.transaction_date).toLocaleString('en-PH') %></td>
+                        <td><%= r.account_number %></td>
+                        <td><%= r.customer %></td>
+                        <td><span class="transaction <%= r.kind %>"><%= labels[r.kind] %></span></td>
+                        <td><%= r.description %></td>
+                        <td class="money"><%= fmt(r.amount) %></td>
+                    </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+</body>
+</html>

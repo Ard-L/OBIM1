@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+<%- include('partials/customer-header', { active: 'profile' }) %>
+
+<main class="container">
+    <div class="page-header">
+        <h1>My Profile</h1>
+        <p>View and update your account details.</p>
+    </div>
+
+    <% if (success) { %><div class="alert success"><%= success %></div><% } %>
+    <% if (error) { %><div class="alert error"><%= error %></div><% } %>
+
+    <section class="account-summary">
+        <div class="info-card"><span>Username</span><h3><%= username %></h3></div>
+        <div class="info-card"><span>Account Number</span><h3><%= account.account_number %></h3></div>
+        <div class="info-card"><span>Account Type</span><h3><%= account.account_type %></h3><p>Status: <strong><%= account.status %></strong></p></div>
+    </section>
+
+    <section class="card">
+        <h2>Personal Information</h2>
+        <form action="/customer/profile" method="POST" class="validate-form" novalidate>
+            <div class="form-grid">
+                <div><label>First Name</label>
+                    <input type="text" name="first_name" value="<%= customer.first_name %>" required></div>
+                <div><label>Last Name</label>
+                    <input type="text" name="last_name" value="<%= customer.last_name %>" required></div>
+                <div><label>Email</label>
+                    <input type="email" name="email" value="<%= customer.email %>" required></div>
+                <div><label>Phone</label>
+                    <input type="text" name="phone" value="<%= customer.phone || '' %>"
+                           pattern="[0-9+\- ]{7,15}" data-msg="Enter a valid phone number."></div>
+            </div>
+            <label>Address</label>
+            <textarea name="address" rows="2"><%= customer.address || '' %></textarea>
+            <button type="submit" class="btn primary">Save Changes</button>
+        </form>
+    </section>
+
+    <section class="card">
+        <h2>Change Password</h2>
+        <form action="/customer/profile/password" method="POST" class="validate-form" novalidate>
+            <label>Current Password</label>
+            <input type="password" name="current_password" required>
+            <label>New Password</label>
+            <input type="password" id="npw" name="new_password" minlength="6" required data-strength>
+            <label>Confirm New Password</label>
+            <input type="password" name="confirm_password" required data-match="#npw">
+            <button type="submit" class="btn primary">Change Password</button>
+        </form>
+    </section>
+</main>
+<script src="/validate.js"></script>
+</body>
+</html>

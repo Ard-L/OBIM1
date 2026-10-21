@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pay Bills</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+<%- include('partials/customer-header', { active: 'bills' }) %>
+
+<main class="container">
+    <div class="page-header">
+        <h1>Pay Bills</h1>
+        <p>Available balance:
+            <strong>₱<%= Number(account.balance).toLocaleString('en-PH', { minimumFractionDigits: 2 }) %></strong>
+            &middot; Account <%= account.account_number %></p>
+    </div>
+
+    <% if (success) { %><div class="alert success"><%= success %></div><% } %>
+    <% if (error) { %><div class="alert error"><%= error %></div><% } %>
+
+    <section class="card">
+        <h2>New Payment</h2>
+        <form class="validate-form" novalidate action="/customer/bills/pay" method="POST">
+            <label>Biller</label>
+            <select name="biller" required>
+                <option value="" disabled selected>Select a biller</option>
+                <% Object.keys(billers).forEach(cat => { %>
+                <optgroup label="<%= cat %>">
+                    <% billers[cat].forEach(b => { %>
+                    <option value="<%= b %>"><%= b %></option>
+                    <% }) %>
+                </optgroup>
+                <% }) %>
+            </select>
+
+            <label>Reference / Account Number</label>
+            <input type="text" name="reference_no" maxlength="40" placeholder="e.g. 1234567890" required>
+
+            <label>Amount</label>
+            <div class="money-input">
+                <span>₱</span>
+                <input type="number" name="amount" min="1" step="0.01" placeholder="0.00" required>
+            </div>
+
+            <button type="submit" class="btn primary">Pay Bill</button>
+        </form>
+    </section>
+
+    <section class="card">
+        <h2>Recent Bill Payments</h2>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr><th>Date</th><th>Biller</th><th>Category</th><th>Reference</th><th>Amount</th></tr>
+                </thead>
+                <tbody>
+                    <% if (payments.length === 0) { %>
+                    <tr><td colspan="5" class="empty">No bill payments yet.</td></tr>
+                    <% } %>
+                    <% payments.forEach(p => { %>
+                    <tr>
+                        <td><%= new Date(p.paid_at).toLocaleString('en-PH') %></td>
+                        <td><strong><%= p.biller %></strong></td>
+                        <td><%= p.category %></td>
+                        <td><%= p.reference_no %></td>
+                        <td class="money"><%= Number(p.amount).toLocaleString('en-PH', { minimumFractionDigits: 2 }) %></td>
+                    </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+<script src="/validate.js"></script>
+</body>
+</html>

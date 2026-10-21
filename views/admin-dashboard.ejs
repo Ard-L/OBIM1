@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+
+<body>
+    <%- include('partials/admin-header', { active: 'dashboard' }) %>
+
+    <main class="container">
+        <div class="page-header">
+            <div>
+                <h1>Admin Dashboard</h1>
+                <p>Manage customer accounts.</p>
+            </div>
+        </div>
+
+        <a href="/admin/create" class="btn primary">
+            + Create Customer
+        </a>
+
+        <% if (success) { %><div class="alert success"><%= success %></div><% } %>
+        <% if (error) { %><div class="alert error"><%= error %></div><% } %>
+
+        <section class="card">
+            <h2>Pending Registrations (<%= pending.length %>)</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr><th>Customer</th><th>Username</th><th>Email</th><th>Phone</th><th>Account Type</th><th>Action</th></tr>
+                    </thead>
+                    <tbody>
+                        <% if (pending.length === 0) { %>
+                        <tr><td colspan="6" class="empty">No pending registrations.</td></tr>
+                        <% } %>
+                        <% pending.forEach(p => { %>
+                        <tr>
+                            <td><strong><%= p.first_name %> <%= p.last_name %></strong></td>
+                            <td><%= p.username %></td>
+                            <td><%= p.email %></td>
+                            <td><%= p.phone %></td>
+                            <td><span class="badge pending"><%= p.requested_account_type || 'Savings' %></span></td>
+                            <td class="actions">
+                                <form action="/admin/approve/<%= p.user_id %>" method="POST">
+                                    <button class="btn primary sm">Approve</button>
+                                </form>
+                                <form action="/admin/reject/<%= p.user_id %>" method="POST">
+                                    <button class="btn danger sm">Reject</button>
+                                </form>
+                            </td>
+                        </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2>Customer Accounts</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Customer</th>
+                            <th>Username</th>
+                            <th>Account</th>
+                            <th>Type</th>
+                            <th>Balance</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <% customers.forEach(customer => { %>
+                        <tr>
+                            <td><%= customer.customer_id %></td>
+                            <td>
+                                <strong>
+                                    <%= customer.first_name %> <%= customer.last_name %>
+                                </strong>
+                            </td>
+                            <td><%= customer.username %></td>
+                            <td><%= customer.account_number %></td>
+                            <td><%= customer.account_type %></td>
+                            <td class="money">
+                                <%= Number(customer.balance).toLocaleString(
+                                    'en-PH',
+                                    { minimumFractionDigits: 2 }
+                                ) %>
+                            </td>
+                            <td>
+                                <span class="status">
+                                    <%= customer.status %>
+                                </span>
+                            </td>
+                        </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

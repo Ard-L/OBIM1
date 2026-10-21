@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Customer</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<%- include('partials/admin-header', { active: 'create' }) %>
+
+<main class="container">
+    <div class="page-header">
+        <h1>Create Customer</h1>
+        <p>Create a new banking customer.</p>
+    </div>
+
+    <a href="/admin" class="btn secondary">Back</a>
+
+    <% if (error) { %>
+    <div class="alert error"><%= error %></div>
+    <% } %>
+
+    <section class="card">
+        <form class="validate-form" novalidate action="/admin/create" method="POST">
+            <h2>Login Information</h2>
+            <div class="form-grid">
+                <div>
+                    <label>Username</label>
+                    <input type="text" name="username" required>
+                </div>
+                <div>
+                    <label>Password</label>
+                    <input type="password" name="password" required>
+                </div>
+            </div>
+
+            <h2>Customer Information</h2>
+            <div class="form-grid">
+                <div>
+                    <label>First Name</label>
+                    <input type="text" name="first_name" required>
+                </div>
+                <div>
+                    <label>Last Name</label>
+                    <input type="text" name="last_name" required>
+                </div>
+                <div>
+                    <label>Email</label>
+                    <input type="email" name="email">
+                </div>
+                <div>
+                    <label>Phone</label>
+                    <input type="text" name="phone">
+                </div>
+            </div>
+
+            <label>Address</label>
+            <textarea name="address" rows="3"></textarea>
+
+            <h2>Bank Account</h2>
+            <div class="form-grid">
+                <div>
+                    <label>Account Number</label>
+                    <input type="text" name="account_number" required>
+                </div>
+                <div>
+                    <label>Account Type</label>
+                    <select name="account_type">
+                        <option value="Savings">Savings</option>
+                        <option value="Checking">Checking</option>
+                    </select>
+                </div>
+            </div>
+
+            <button type="submit" class="btn primary">Create Customer</button>
+        </form>
+    </section>
+</main>
+<script src="/validate.js"></script>
+</body>
+</html>

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Dashboard</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+<%- include('partials/customer-header', { active: 'dashboard' }) %>
+
+<main class="container">
+    <div class="page-header">
+        <h1>Welcome, <%= account.first_name %></h1>
+        <p>Manage your bank account.</p>
+    </div>
+
+    <% if (success) { %><div class="alert success"><%= success %></div><% } %>
+    <% if (error) { %><div class="alert error"><%= error %></div><% } %>
+
+    <section class="account-summary">
+        <div class="balance-card">
+            <span>Available Balance</span>
+            <h1>₱<%= Number(account.balance).toLocaleString('en-PH', { minimumFractionDigits: 2 }) %></h1>
+            <p>Account: <strong><%= account.account_number %></strong></p>
+        </div>
+        <div class="info-card">
+            <span>Account Holder</span>
+            <h3><%= account.first_name %> <%= account.last_name %></h3>
+            <p><%= account.email %></p>
+        </div>
+        <div class="info-card">
+            <span>Account Type</span>
+            <h3><%= account.account_type %></h3>
+            <p>Status: <strong><%= account.status %></strong></p>
+        </div>
+    </section>
+
+    <div class="two-col">
+        <div class="card">
+            <h2>Deposit Money</h2>
+            <form action="/customer/deposit" method="POST" class="validate-form" novalidate>
+                <label>Deposit Amount</label>
+                <div class="money-input">
+                    <span>₱</span>
+                    <input type="number" name="amount" min="1" step="0.01" placeholder="0.00" required>
+                </div>
+                <button type="submit" class="btn primary">Deposit Money</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h2>Withdraw Money</h2>
+            <form action="/customer/withdraw" method="POST" class="validate-form" novalidate>
+                <label>Withdrawal Amount</label>
+                <div class="money-input">
+                    <span>₱</span>
+                    <input type="number" name="amount" min="1" step="0.01" placeholder="0.00" required>
+                </div>
+                <button type="submit" class="btn danger">Withdraw Money</button>
+            </form>
+        </div>
+    </div>
+
+    <section class="card" id="history">
+        <div class="section-header">
+            <div>
+                <h2>Transaction History</h2>
+                <p>Search, filter and sort your activity</p>
+            </div>
+            <div class="sort-bar" id="sortBar">
+                <button type="button" class="sort-btn active" data-key="date" data-dir="desc">Newest first</button>
+                <button type="button" class="sort-btn" data-key="date" data-dir="asc">Oldest first</button>
+                <button type="button" class="sort-btn" data-key="amount" data-dir="desc">Highest amount</button>
+                <button type="button" class="sort-btn" data-key="amount" data-dir="asc">Lowest amount</button>
+            </div>
+        </div>
+
+        <div class="toolbar">
+            <input type="search" id="txSearch" placeholder="Search description, date or amount…">
+            <select id="txType">
+                <option value="all">All types</option>
+                <option value="deposit">Deposits</option>
+                <option value="withdrawal">Withdrawals</option>
+                <option value="bill">Bill payments</option>
+                <option value="transfer">Transfers</option>
+            </select>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr><th>Date</th><th>Type</th><th>Description</th><th>Amount</th></tr>
+                </thead>
+                <tbody id="txBody">
+                    <% if (transactions.length === 0) { %>
+                    <tr><td colspan="4" class="empty">No transactions yet.</td></tr>
+                    <% } %>
+
+                    <% const labels = { deposit: 'Deposit', withdrawal: 'Withdrawal', bill: 'Bill Payment', transfer: 'Transfer' }; %>
+                    <% transactions.forEach(t => {
+                        const desc = t.description || '';
+                        const kind = desc.startsWith('Bill Payment') ? 'bill'
+                                   : desc.startsWith('Transfer') ? 'transfer'
+                                   : (t.transaction_type == 'Deposit' ? 'deposit' : 'withdrawal');
+                        const when = new Date(t.transaction_date);
+                    %>
+                    <tr data-date="<%= when.getTime() %>" data-amount="<%= Number(t.amount) %>" data-type="<%= kind %>"
+                        data-text="<%= (when.toLocaleString('en-PH') + ' ' + desc + ' ' + labels[kind] + ' ' + Number(t.amount)).toLowerCase() %>">
+                        <td><%= when.toLocaleString('en-PH') %></td>
+                        <td><span class="transaction <%= kind %>"><%= labels[kind] %></span></td>
+                        <td><%= desc %></td>
+                        <td class="money"><%= Number(t.amount).toLocaleString('en-PH', { minimumFractionDigits: 2 }) %></td>
+                    </tr>
+                    <% }) %>
+                    <tr id="txEmpty" hidden><td colspan="4" class="empty">No matching transactions.</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+
+<script src="/validate.js"></script>
+<script>
+(function () {
+    const body = document.getElementById('txBody');
+    const buttons = document.querySelectorAll('#sortBar .sort-btn');
+    const search = document.getElementById('txSearch');
+    const typeSel = document.getElementById('txType');
+    const emptyRow = document.getElementById('txEmpty');
+    const rows = () => Array.from(body.querySelectorAll('tr[data-date]'));
+
+    // ---- search + type filter ----
+    function applyFilter() {
+        const q = search.value.trim().toLowerCase();
+        const t = typeSel.value;
+        let shown = 0;
+        rows().forEach(r => {
+            const match = (!q || r.dataset.text.includes(q)) && (t === 'all' || r.dataset.type === t);
+            r.hidden = !match;
+            if (match) shown++;
+        });
+        emptyRow.hidden = shown !== 0 || rows().length === 0;
+    }
+    search.addEventListener('input', applyFilter);
+    typeSel.addEventListener('change', applyFilter);
+
+    // ---- sort (animated, no reload) ----
+    buttons.forEach(btn => btn.addEventListener('click', () => {
+        const key = btn.dataset.key;
+        const dir = btn.dataset.dir === 'asc' ? 1 : -1;
+        const list = rows();
+
+        buttons.forEach(b => b.classList.toggle('active', b === btn));
+        if (list.length < 2) return;
+
+        const first = new Map(list.map(r => [r, r.getBoundingClientRect().top]));
+
+        list.sort((a, b) => dir * (Number(a.dataset[key]) - Number(b.dataset[key])));
+        list.forEach(r => body.insertBefore(r, emptyRow));
+
+        let i = 0;
+        list.forEach(r => {
+            if (r.hidden) return;
+            const dy = first.get(r) - r.getBoundingClientRect().top;
+            if (!dy) return;
+            r.animate(
+                [
+                    { transform: 'translateY(' + dy + 'px)', opacity: 0.5 },
+                    { transform: 'translateY(0)', opacity: 1 }
+                ],
+                { duration: 450, delay: Math.min(i++ * 12, 250), easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'backwards' }
+            );
+        });
+    }));
+})();
+</script>
+</body>
+</html>
